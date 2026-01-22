@@ -1,4 +1,4 @@
-using ExpenseControl.Api.Middlewares;
+﻿using ExpenseControl.Api.Middlewares;
 using ExpenseControl.Infrastructure;
 
 namespace ExpenseControl.Api;
@@ -13,10 +13,21 @@ internal class Program
     {
         var builder = WebApplication.CreateBuilder(args);
 
-        // Controllers (se usar)
         builder.Services.AddControllers();
 
-        // Swagger - SEMPRE antes do Build
+        // CORS
+        builder.Services.AddCors(options =>
+        {
+            options.AddPolicy("AllowFrontend", policy =>
+            {
+                policy
+                    .WithOrigins("http://localhost:5173")
+                    .AllowAnyHeader()
+                    .AllowAnyMethod();
+            });
+        });
+
+
         builder.Services.AddEndpointsApiExplorer();
         builder.Services.AddSwaggerGen();
 
@@ -34,6 +45,9 @@ internal class Program
         }
 
         app.UseHttpsRedirection();
+
+        app.UseCors("AllowFrontend");
+
         app.UseMiddleware<ExceptionMiddleware>();
 
         app.MapControllers();
